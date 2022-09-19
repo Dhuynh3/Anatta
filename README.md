@@ -1,2 +1,0 @@
-# Anatta
- Anatta Loader

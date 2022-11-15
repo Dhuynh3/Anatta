@@ -1,58 +1,52 @@
-#include <windows.h>
+#include <drogon/drogon.h>
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+
+#include <future>
+#include <iostream>
+
+using namespace drogon;
+
+int nth_resp = 0;
+
+int main()
 {
-    switch (message)
+    trantor::Logger::setLogLevel(trantor::Logger::kTrace);
     {
-    case WM_COMMAND:
-    {
-        int wmId = LOWORD(wParam);
-        // Parse the menu selections:
-        switch (wmId)
+        auto client = HttpClient::newHttpClient("http://www.baidu.com");
+        auto req = HttpRequest::newHttpRequest();
+        req->setMethod(drogon::Get);
+        req->setPath("/s");
+        req->setParameter("wd", "wx");
+        req->setParameter("oq", "wx");
+
+        for (int i = 0; i < 2; ++i)
         {
-        case IDM_ABOUT:
-            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-            break;
-        case IDM_EXIT:
-            DestroyWindow(hWnd);
-            break;
-        default:
-            return DefWindowProc(hWnd, message, wParam, lParam);
+            client->sendRequest(
+                req, [](ReqResult result, const HttpResponsePtr& response) {
+                    if (result != ReqResult::Ok)
+                    {
+                        std::cout
+                            << "error while sending request to server! result: "
+                            << result << std::endl;
+                        return;
+                    }
+
+                    std::cout << "receive response!" << std::endl;
+                    // auto headers=response.
+                    ++nth_resp;
+                    std::cout << response->getBody() << std::endl;
+                    auto cookies = response->cookies();
+                    for (auto const& cookie : cookies)
+                    {
+                        std::cout << cookie.first << "="
+                            << cookie.second.value()
+                            << ":domain=" << cookie.second.domain()
+                            << std::endl;
+                    }
+                    std::cout << "count=" << nth_resp << std::endl;
+                });
         }
     }
-    break;
-    case WM_PAINT:
-    {
-        PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(hWnd, &ps);
-        // TODO: Add any drawing code that uses hdc here...
-        EndPaint(hWnd, &ps);
-    }
-    break;
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        break;
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
-    }
-    return 0;
-}
 
-bool RegisterClassAndCreateWindow(HINSTANCE hInstance) {
-
-    WNDCLASSW wc = { 0 };
-    wc.hbrBackground = (HBRUSH)COLOR_WINDOW; // Try new colors https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getsyscolor
-    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wc.hInstance = hInstance;
-    wc.lpszClassName = L"WindowsClass";
-    wc.lpfnWndProc = 
-
-}
-
-
-
-int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow)
-{
-    MessageBoxA(NULL, "hello, world", "caption", 0);
-    return 0; 
+    app().run();
 }

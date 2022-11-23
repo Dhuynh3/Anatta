@@ -11,6 +11,7 @@ using namespace std;
 
 #define BUTTON_1 0x01
 #define BUTTON_2 0x02
+#define IDC_EDIT 0x03
 
 class GUI {
 public:
@@ -19,14 +20,16 @@ public:
 	int Run();
 	static LRESULT CALLBACK MessageRouter(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-	HWND windowHandle;
+	
 	int count;
 
+	HWND windowHandle{ NULL };
+	HWND edit_handle{ NULL };
 	HINSTANCE loader_handle { NULL };
-	int cmd_show { 0 };
-	int ScreenX { 0 };
-	int ScreenY { 0 };
-	int MenuX{ 500 };
+	int cmd_show { NULL };
+	int ScreenX { NULL };
+	int ScreenY { NULL };
+	int MenuX{ 400 };
 	int MenuY{ 400 };
 private:
 

@@ -1,12 +1,54 @@
 #include "Security.h"
 
 Security::Security() {
-
 	
+	NtCreateThreadEx = (pfnNtCreateThreadEx)GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtCreateThreadEx");
+	NtTerminateThread = (pfnNtTerminateThread)GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtTerminateThread");
+
+}
+
+bool Security::AllocateConsole() {
+	if (AllocConsole()) {
+		freopen("CONOUT$", "w", stdout);
+		return true;
+	}
+	return false;
 }
 
 
-std::wstring Security::random_wstring(size_t length)
+
+
+bool Security::RunThread(PVOID StartRoutine, std::string uniqueName, PVOID args) {
+	
+	HANDLE ThreadHandle;
+	NTSTATUS Status = this->NtCreateThreadEx(&ThreadHandle, MAXIMUM_ALLOWED, nullptr, (HANDLE)-1, StartRoutine, args, 0x40, 0, 0, 0, nullptr);
+	if (!NT_SUCCESS(Status)) {
+		return false;
+	}
+
+	tHandleList.insert(std::pair<std::string, HANDLE>(uniqueName, ThreadHandle));
+	return true;
+}
+
+bool Security::CloseThread(std::string uniqueName) {
+
+	std::map<std::string, HANDLE>::iterator it;
+	it = tHandleList.find(uniqueName); 
+
+	if (it != tHandleList.end()) { // If the key exists.
+		NTSTATUS Status = this->NtTerminateThread(it->second, 0);
+		if (!NT_SUCCESS(Status)) {
+			return false;
+		}
+		NtClose(it->second);
+		tHandleList.erase(it);
+		return true;
+	}
+
+	return false; // Thread not found.
+}
+
+std::wstring Security::RandomWString(size_t length)
 {
 	srand(time(NULL));
 	

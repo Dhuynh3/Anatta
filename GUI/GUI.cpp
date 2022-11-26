@@ -19,7 +19,7 @@ GUI::GUI(int nCmdSh, HINSTANCE hInst) {
 	wc.hCursor = LoadCursor(NULL, IDC_CROSS);
 	wc.hbrBackground = HBRUSH(COLOR_GRAYTEXT + 1);
 	wc.lpfnWndProc = MessageRouter;
-	wc.lpszClassName = S.random_wstring(10).c_str();
+	wc.lpszClassName = S.RandomWString(10).c_str();
 	wc.style = CS_VREDRAW | CS_HREDRAW;
 
 	if (!RegisterClassEx(&wc)) {
@@ -51,6 +51,7 @@ int GUI::Run()
 		}
 	}
 	return msg.wParam;
+	
 }
 
 LRESULT CALLBACK GUI::MessageRouter(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)

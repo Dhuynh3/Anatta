@@ -135,9 +135,9 @@
       <Optimization>Disabled</Optimization>
       <ExceptionHandling>false</ExceptionHandling>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>Drogon\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Drogon\include;Crypto;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>-D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH -Xclang -flegacy-pass-manager -mllvm -sub -mllvm -sub_loop=1 -mllvm -split -mllvm -fla -mllvm -bcf -mllvm -bcf_loop=3 -mllvm -bcf_prob=10 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH -Xclang -flegacy-pass-manager -mllvm -sub -mllvm -sub_loop=1 -mllvm -split -mllvm -fla -mllvm -bcf -mllvm -bcf_loop=3 -mllvm -bcf_prob=10 -D_CRYPTOPP_CXX98_UNCAUGHT_EXCEPTION %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -145,7 +145,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
-      <AdditionalDependencies>Drogon\lib\brotlicommon-static.lib;Drogon\lib\brotlidec-static.lib;Drogon\lib\brotlienc-static.lib;Drogon\lib\cares.lib;Drogon\lib\drogon.lib;Drogon\lib\jsoncpp.lib;Drogon\lib\libcrypto.lib;Drogon\lib\libssl.lib;Drogon\lib\trantor.lib;Drogon\lib\zlib.lib;Rpcrt4.lib;ws2_32.lib;crypt32.lib;Advapi32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Crypto\cryptlib.lib;Drogon\lib\brotlicommon-static.lib;Drogon\lib\brotlidec-static.lib;Drogon\lib\brotlienc-static.lib;Drogon\lib\cares.lib;Drogon\lib\drogon.lib;Drogon\lib\jsoncpp.lib;Drogon\lib\libcrypto.lib;Drogon\lib\libssl.lib;Drogon\lib\trantor.lib;Drogon\lib\zlib.lib;Rpcrt4.lib;ws2_32.lib;crypt32.lib;Advapi32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

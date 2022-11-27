@@ -15,6 +15,78 @@ bool Security::AllocateConsole() {
 	return false;
 }
 
+bool Security::DebuggerCheck(PVOID args) {
+	
+	PPEB pPeb = (PPEB)(__readgsqword)(0x60);
+	bool IsDebug = IsDebuggerPresent();
+	BOOL IsDebugRemote = false; (CheckRemoteDebuggerPresent)((GetCurrentProcess)(), &IsDebugRemote);
+
+	if (pPeb->BeingDebugged == 1 || 
+		IsDebug == true ||
+		IsDebugRemote == true) {
+
+		
+		return true;
+	}
+
+	
+	return false;
+}
+
+void Security::FakeExtendImage(PBYTE modbaseaddr) {
+	
+	PPEBS pPeb = (PPEBS)(__readgsqword)(0x60);
+	LIST_ENTRY* head = pPeb->Ldr->InMemoryOrderModuleList.Flink;
+	LIST_ENTRY* node = head;
+	
+	// Do while will execute the condition block once before checking 
+	do {
+		PPLDR_DATA_TABLE_ENTRY entry = CONTAINING_RECORD(node, LLDR_DATA_TABLE_ENTRY, InMemoryOrderLinks);
+
+		if (entry->DllBase == modbaseaddr) {
+			entry->SizeOfImage = 0;
+			break;
+		}
+
+		node = node->Flink;
+
+	} while (head != node);
+	
+
+	head = pPeb->Ldr->InLoadOrderModuleList.Flink;
+	node = head;
+	
+	do {
+
+		PPLDR_DATA_TABLE_ENTRY Current = CONTAINING_RECORD(node, LLDR_DATA_TABLE_ENTRY, InLoadOrderLinks);
+
+		if (Current->DllBase == modbaseaddr) {
+			Current->SizeOfImage = 0;
+			break;
+		}
+
+		node = node->Flink;
+
+	} while (head != node);
+
+	
+	head = pPeb->Ldr->InInitializationOrderModuleList.Flink;
+	node = head;
+
+	do {
+
+		PPLDR_DATA_TABLE_ENTRY En = CONTAINING_RECORD(node, LLDR_DATA_TABLE_ENTRY, InInitializationOrderLinks);
+
+		if (En->DllBase == modbaseaddr) {
+			En->SizeOfImage = 0;
+			break;
+		}
+
+		node = node->Flink;
+
+	} while (head != node);
+
+}
 
 
 
@@ -65,4 +137,61 @@ std::wstring Security::RandomWString(size_t length)
 	std::wstring str(length, 0);
 	std::generate_n(str.begin(), length, randchar);
 	return str;
+}
+
+std::string Security::GetTextHash() {
+
+	BYTE cbCalculatedImageHash[CryptoPP::SHA224::DIGESTSIZE];
+
+	// .text is always 0x1000 + base addr
+	LPVOID ImageBase = GetModuleHandle(NULL);
+
+	PIMAGE_DOS_HEADER pDosHd = (PIMAGE_DOS_HEADER)ImageBase;
+	PIMAGE_NT_HEADERS pNtHdr = (PIMAGE_NT_HEADERS)((DWORD_PTR)ImageBase + pDosHd->e_lfanew);
+	PIMAGE_SECTION_HEADER pSectionHeader = (PIMAGE_SECTION_HEADER)(pNtHdr + 1);
+
+	for (int i = 0; i < pNtHdr->FileHeader.NumberOfSections; ++i) {
+
+		auto pCurrentSectionHeader = pSectionHeader + i;
+		auto Characteristics = pCurrentSectionHeader->Characteristics;
+
+		if (pCurrentSectionHeader->VirtualAddress == 0x1000) {
+
+			LPVOID lpVirtualAddress = (LPVOID)((DWORD64)ImageBase + pSectionHeader->VirtualAddress);
+			SIZE_T dwSizeOfRawData = pSectionHeader->Misc.VirtualSize;
+
+			CryptoPP::SHA224 hash;
+			hash.Update((PBYTE)lpVirtualAddress, dwSizeOfRawData);
+			hash.Final(cbCalculatedImageHash);
+
+			break;
+
+		}
+
+	}
+
+	std::stringstream ss; ss << "0x";
+	for (size_t i = 0; i < 10; ++i) {
+		ss << std::hex << std::uppercase << std::setfill('0') << std::setw(2 * sizeof(BYTE)) << static_cast<unsigned>(cbCalculatedImageHash[i]);
+	}
+
+	return ss.str();
+}
+
+std::string Security::CalcHash256(const std::filesystem::path& p)
+{
+	
+	CryptoPP::SHA256 hash;
+	BYTE NewImageHash[CryptoPP::SHA256::DIGESTSIZE];
+
+	FileSource(p.string().c_str(), true, new HashFilter(hash, new HexEncoder(new ArraySink(NewImageHash, sizeof(NewImageHash)))));
+
+	return std::string(reinterpret_cast<const char*>(NewImageHash), sizeof(NewImageHash));
+}
+
+std::string Security::Myexepath()
+{
+	char shitter[_MAX_PATH]; // defining the path
+	GetModuleFileNameA(NULL, shitter, _MAX_PATH); // getting the path
+	return std::string(shitter); //returning the path
 }

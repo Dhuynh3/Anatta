@@ -25,26 +25,80 @@ void menu1(PVOID args) {
 	s.Run();
 }
 
-void menu2() {
 
-	Connection S("ws://127.0.0.1", "/chat", 8848);
-	S.SetupWebSocket();
-	printf("Server :%s\n", S.serverString.c_str());
-    
+
+
+
+
+void DebuggerThread(PVOID args) {
 	
+	Security* s = (Security*)args;
+	while (true) {
+		if (s->DebuggerCheck(args)) {
+			printf("Debugger detected!\n");
+	
+		}
+		Sleep(1000);
+	}
+
 }
 
-void threadtest() {
-	while (true) {
-		Sleep(1000);
-		printf("igged\n");
-	}
+
+Connection S("ws://127.0.0.1", "/chat", 8848);
+
+void WebSocket() {
+
+
+
+	S.SetupWebSocket();
+	printf("Server :%s\n", S.serverString.c_str());
+
+	S.wsPtr->setMessageHandler([](const std::string& message,
+		const WebSocketClientPtr&,
+		const WebSocketMessageType& type) {
+			std::string messageType = "Unknown";
+	if (type == WebSocketMessageType::Text)
+		messageType = "text";
+	else if (type == WebSocketMessageType::Pong)
+		messageType = "pong";
+	else if (type == WebSocketMessageType::Ping)
+		messageType = "ping";
+	else if (type == WebSocketMessageType::Binary)
+		messageType = "binary";
+	else if (type == WebSocketMessageType::Close)
+		messageType = "Close";
+
+	LOG_INFO << "new message (" << messageType << "): " << message;
+		});
+
+	S.wsPtr->setConnectionClosedHandler([](const WebSocketClientPtr&) {
+		LOG_INFO << "WebSocket connection closed!";
+		});
+
+	LOG_INFO << "Connecting to WebSocket at " << S.server;
+
+	S.wsPtr->connectToServer(S.req, [](ReqResult r, const HttpResponsePtr&, const WebSocketClientPtr& wsPtr) {
+
+		if (r != ReqResult::Ok) {
+			LOG_ERROR << "Failed to establish WebSocket connection!";
+			wsPtr->stop();
+			return;
+		}
+
+	LOG_INFO << "WebSocket connected!";
+	wsPtr->getConnection()->setPingMessage("", 2s);
+	wsPtr->getConnection()->send("hello!");
+		});
+
+	S.Run();
+
 }
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) {
 
 	Security Begin;
 	Begin.AllocateConsole();
+	Begin.RunThread(WebSocket, "WebSocket", nullptr);
 	
 	while (true) {
 		printf("Heartbeat\n");
@@ -53,51 +107,3 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 
 	return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-if (AllocConsole()) {
-		freopen("CONOUT$", "w", stdout);
-
-		Security S;
-
-		struct Params {
-			int cmdshow;
-			HINSTANCE hInst;
-		};
-		Params test;
-		test.cmdshow = ncmdshow;
-		test.hInst = hInst;
-		printf("Test addr :%p", &test);
-
-		S.RunThread(menu1, "menu1", &test);
-		S.RunThread(threadtest, "nig", nullptr);
-		Sleep(5000);
-
-		S.CloseThread("nig");
-
-		
-
-
-	}
-
-
-
-	
-*/

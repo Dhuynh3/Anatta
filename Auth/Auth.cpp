@@ -12,9 +12,17 @@ Connection::Connection(std::string input_server_string, std::string input_path, 
 
 bool Connection::SetupWebSocket() {
 
-	this->serverString = "niggers";
-
-	//this->wsPtr = WebSocketClient::newWebSocketClient(this->server + ":" + std::to_string(port));
+	if (this->port == 0) {
+		this->serverString = this->server;
+	}
+	else {
+		this->serverString = this->server + ":" + std::to_string(this->port);
+	}
+	
+	this->wsPtr = WebSocketClient::newWebSocketClient(this->serverString);
+	this->req = HttpRequest::newHttpRequest();
+	this->req->setPath(this->path);
+	
 	return true;
 }
 

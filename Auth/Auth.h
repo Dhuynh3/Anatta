@@ -18,6 +18,7 @@ public:
 	
 	
 	drogon::WebSocketClientPtr wsPtr{ NULL };
+	drogon::HttpRequestPtr req{ NULL };
 	std::string server{ ("") };
 	std::string path{ ("") };
 	std::string serverString { ("") };

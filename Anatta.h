@@ -11,6 +11,8 @@
 #include "hex.h"
 #include "aes.h"
 
+#pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+
 using namespace CryptoPP;
 
 typedef struct _PS_ATTRIBUTE
@@ -241,5 +243,11 @@ typedef struct _PEBS
 	};
 	ULONG NtGlobalFlag2;                                                    //0x7c4
 } PEBS, * PPEBS;
+
+struct GuiParams {
+	int cmdshow;
+	HINSTANCE hInst;
+};
+
 
 #endif ANATTA_H

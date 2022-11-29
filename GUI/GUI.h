@@ -4,7 +4,10 @@
 #include <Windows.h>
 #include <iostream>
 #include <string>
+#include <CommCtrl.h>
+#include <WinUser.h>
 
+#include "../resource.h"
 #include "../Security/Security.h"
 
 using namespace std;
@@ -20,17 +23,21 @@ public:
 	int Run();
 	static LRESULT CALLBACK MessageRouter(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 	
 	int count;
 
+	HANDLE logoImage{ NULL };
+	HWND logoWindow{ NULL };
 	HWND windowHandle{ NULL };
 	HWND edit_handle{ NULL };
+	HWND button_handle{ NULL };
 	HINSTANCE loader_handle { NULL };
 	int cmd_show { NULL };
 	int ScreenX { NULL };
 	int ScreenY { NULL };
-	int MenuX{ 400 };
-	int MenuY{ 400 };
+	int MenuX{ 300 };
+	int MenuY{ 350 };
 private:
 
 };

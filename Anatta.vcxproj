@@ -158,7 +158,14 @@
     <ClInclude Include="Anatta.h" />
     <ClInclude Include="Auth\Auth.h" />
     <ClInclude Include="GUI\GUI.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Security\Security.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Anatta.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="zwgax.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

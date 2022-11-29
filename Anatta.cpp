@@ -6,24 +6,6 @@
 #include <winternl.h>
 
 
-void menu1(PVOID args) {
-
-	struct Params {
-		int cmdshow;
-		HINSTANCE hInst;
-	};
-
-
-	// Cast args to params struct and deference the address. 
-	Params te = *(Params*)args;
-	printf("Test addr :%p", args);
-
-	GUI s(te.cmdshow, te.hInst);
-
-	printf("Hnst %p\n", s.loader_handle);
-
-	s.Run();
-}
 
 
 
@@ -53,52 +35,38 @@ void WebSocket() {
 	S.SetupWebSocket();
 	printf("Server :%s\n", S.serverString.c_str());
 
-	S.wsPtr->setMessageHandler([](const std::string& message,
-		const WebSocketClientPtr&,
-		const WebSocketMessageType& type) {
-			std::string messageType = "Unknown";
-	if (type == WebSocketMessageType::Text)
-		messageType = "text";
-	else if (type == WebSocketMessageType::Pong)
-		messageType = "pong";
-	else if (type == WebSocketMessageType::Ping)
-		messageType = "ping";
-	else if (type == WebSocketMessageType::Binary)
-		messageType = "binary";
-	else if (type == WebSocketMessageType::Close)
-		messageType = "Close";
-
-	LOG_INFO << "new message (" << messageType << "): " << message;
-		});
-
-	S.wsPtr->setConnectionClosedHandler([](const WebSocketClientPtr&) {
-		LOG_INFO << "WebSocket connection closed!";
-		});
-
-	LOG_INFO << "Connecting to WebSocket at " << S.server;
-
-	S.wsPtr->connectToServer(S.req, [](ReqResult r, const HttpResponsePtr&, const WebSocketClientPtr& wsPtr) {
-
-		if (r != ReqResult::Ok) {
-			LOG_ERROR << "Failed to establish WebSocket connection!";
-			wsPtr->stop();
-			return;
-		}
-
-	LOG_INFO << "WebSocket connected!";
-	wsPtr->getConnection()->setPingMessage("", 2s);
-	wsPtr->getConnection()->send("hello!");
-		});
+	
 
 	S.Run();
 
 }
 
+
+
+
+
+void Menu(PVOID args) {
+
+	// Cast args to params struct and deference the address. 
+	GuiParams te = *(GuiParams*)args;
+
+	GUI GuiObject(te.cmdshow, te.hInst);
+
+	GuiObject.Run();
+}
+
+
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) {
 
 	Security Begin;
 	Begin.AllocateConsole();
-	Begin.RunThread(WebSocket, "WebSocket", nullptr);
+	
+	GuiParams params;
+	params.cmdshow = ncmdshow; 
+	params.hInst = hInst;
+	
+	Begin.RunThread(Menu, "Menu", &params);
+
 	
 	while (true) {
 		printf("Heartbeat\n");

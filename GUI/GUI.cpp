@@ -12,23 +12,25 @@ GUI::GUI(int nCmdSh, HINSTANCE hInst) {
 	ScreenX = GetSystemMetrics(SM_CXSCREEN);
 	ScreenY = GetSystemMetrics(SM_CYSCREEN);
 
-	WNDCLASSEX wc { 0 };
+	WNDCLASSEXW wc { 0 };
 	SecureZeroMemory(&wc, sizeof(wc));
 	
-	wc.cbSize = sizeof(WNDCLASSEX);
+	wc.cbSize = sizeof(WNDCLASSEXW);
 	wc.hCursor = LoadCursor(NULL, IDC_CROSS);
-	wc.hbrBackground = HBRUSH(COLOR_GRAYTEXT + 1);
+	wc.hbrBackground = CreateSolidBrush(RGB(34, 34, 34));
 	wc.lpfnWndProc = MessageRouter;
-	wc.lpszClassName = S.RandomWString(10).c_str();
+	wc.lpszClassName = L"Hello";
 	wc.style = CS_VREDRAW | CS_HREDRAW;
 
 	if (!RegisterClassEx(&wc)) {
-		MessageBox(NULL, L"Failed to register window class", L"Error", MB_OK | MB_ICONERROR);
+		printf("Failed to register class Error %i\n", GetLastError());
 	}
 
 	// We put a pointer to the current class instance as our last creation parameter. We'll recover it in the Message Routing function
 	windowHandle = CreateWindowEx(NULL, wc.lpszClassName, wc.lpszClassName, WS_OVERLAPPEDWINDOW | WS_VISIBLE, ((ScreenX / 2) - (MenuX/2)), ((ScreenY / 2) - (MenuY / 2)), MenuX, MenuY, NULL, NULL, loader_handle, this);
 	SetWindowLong(windowHandle, GWL_STYLE, 0);
+	SetWindowLong(windowHandle, GWL_STYLE, WS_BORDER);
+	SetWindowLong(windowHandle, GWL_EXSTYLE, WS_EX_TOPMOST);
 
 	if (windowHandle != INVALID_HANDLE_VALUE)
 	{
@@ -74,15 +76,45 @@ LRESULT CALLBACK GUI::MessageRouter(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 	//We call the actual WndProc. This one is a member of the class and has access to its members
 	return app->WndProc(hWnd, msg, wParam, lParam);
 }
+
 LRESULT CALLBACK GUI::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
-	case WM_CREATE:
-		CreateWindowA(("button"), ("Count"), WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE, 10, 10, 85, 18, hWnd, (HMENU)BUTTON_1, GetModuleHandle(NULL), NULL);
-		CreateWindowA(("button"), ("Show count"), WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE, 100, 10, 85, 18, hWnd, (HMENU)BUTTON_2, GetModuleHandle(NULL), NULL);
-		this->edit_handle = CreateWindowA(("EDIT"), (""), WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_UPPERCASE | ES_WANTRETURN, 100, 50, 85, 18, hWnd, (HMENU)IDC_EDIT, this->loader_handle, NULL); 
+	case WM_CREATE: {
 
+	
+		this->logoWindow = CreateWindowA(("Static"), "", WS_CHILD | SS_BITMAP | WS_VISIBLE, 0, 0, NULL, NULL, hWnd, NULL, GetModuleHandle(NULL), NULL);
+
+		SendMessage(this->logoWindow, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)LoadBitmap(this->loader_handle, MAKEINTRESOURCE(IDB_BITMAP1)));
+
+
+
+		this->button_handle = CreateWindowA(("button"), (""), WS_CHILD | WS_VISIBLE | BS_OWNERDRAW | ES_CENTER, 250, 5, 45, 25, hWnd, (HMENU)BUTTON_1, this->loader_handle, NULL);
+		
+
+		CreateWindowA(("button"), ("Show count"), WS_CHILD | WS_VISIBLE, 100, 10, 85, 18, hWnd, (HMENU)BUTTON_2, GetModuleHandle(NULL), NULL);
+
+		this->edit_handle = CreateWindowA(("EDIT"), (""), WS_CHILD | WS_VISIBLE | ES_CENTER | ES_UPPERCASE, 25, 250, 250, 50, hWnd, (HMENU)IDC_EDIT, this->loader_handle, NULL);
+
+		LOGFONT logfont;
+		ZeroMemory(&logfont, sizeof(LOGFONT));
+		logfont.lfCharSet = ANSI_CHARSET;
+		logfont.lfHeight = -18;
+		logfont.lfWeight = FW_DEMIBOLD;
+		logfont.lfQuality = CLEARTYPE_QUALITY;
+		logfont.lfPitchAndFamily = FF_DECORATIVE;
+
+		HFONT hFont = CreateFontIndirect(&logfont);
+
+		SendMessage(this->edit_handle, EM_SETLIMITTEXT, 10, NULL);
+		SendMessage(this->edit_handle, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+		WCHAR placeholderText[] = L"Enter here";
+		SendMessage(this->edit_handle, EM_SETCUEBANNER, FALSE, (LPARAM)placeholderText);
+
+		break;
+	}
 	case WM_COMMAND:
 		switch (wParam)
 		{
@@ -91,6 +123,8 @@ LRESULT CALLBACK GUI::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			MessageBeep(MB_ICONINFORMATION);
 			char text[100];
 			GetWindowTextA(this->edit_handle, text, sizeof(text));
+
+
 			printf("Text :%s\n", text);
 			break;
 		case BUTTON_2:
@@ -105,6 +139,55 @@ LRESULT CALLBACK GUI::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		CloseWindow(hWnd);
 		PostQuitMessage(0);
 		break;
+	case WM_DRAWITEM: {
+
+		LPDRAWITEMSTRUCT lpds = (DRAWITEMSTRUCT*)lParam;
+
+		switch (lpds->CtlType) {
+
+			case ODT_BUTTON: {
+				
+				if (lpds->hwndItem == this->button_handle) {
+					printf("show count\n");
+				}
+
+				printf("nigger button\n");
+				SIZE size;
+				char text[100];
+				GetTextExtentPoint32(lpds->hDC, L"X", strlen("X"), &size);
+				SetTextColor(lpds->hDC, RGB(255, 255, 255));
+				SetBkColor(lpds->hDC, RGB(34, 34, 34));
+				ExtTextOutA(lpds->hDC, lpds->rcItem.left + 18, lpds->rcItem.top + 4, ETO_OPAQUE | ETO_CLIPPED, &lpds->rcItem, "X", strlen("X"), NULL);
+				DrawEdge(lpds->hDC, &lpds->rcItem, (lpds->itemState & ODS_SELECTED) ? EDGE_SUNKEN : EDGE_RAISED, BF_MONO); //BF_MONO //BF_RECT
+
+				break;
+			}
+
+		}
+		
+		break;
+	}
+	case WM_CTLCOLOREDIT: {
+		HDC hdc = (HDC)wParam;
+		HWND hwnd = (HWND)lParam;
+		
+		if (this->edit_handle == hwnd) { 
+			printf("nigga handle %i\n", GetDlgCtrlID(hwnd));
+			//SetTextAlign(hdc, TA_LEFT);
+			SetBkColor(hdc, RGB(255, 34, 34));
+			SetTextColor(hdc, RGB(200, 200, 200));
+			SetDCBrushColor(hdc, RGB(34, 34, 34));
+			return (LRESULT)GetStockObject(DC_BRUSH); // return a DC brush.
+		}
+		break;
+	}
+	case WM_KEYDOWN: { // Monitor keys
+
+		break;
+	}
+	case WM_CHAR: {
+		break;
+	}
 	default:
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 		break;
@@ -112,3 +195,4 @@ LRESULT CALLBACK GUI::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	
 	return 0;
 }
+

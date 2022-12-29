@@ -137,7 +137,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>Drogon\include;Crypto;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>-D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH -Xclang -flegacy-pass-manager -mllvm -sub -mllvm -sub_loop=1 -mllvm -split -mllvm -fla -mllvm -bcf -mllvm -bcf_loop=3 -mllvm -bcf_prob=10 -D_CRYPTOPP_CXX98_UNCAUGHT_EXCEPTION %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH -Xclang -flegacy-pass-manager -mllvm -sub -mllvm -sub_loop=1 -mllvm -split -mllvm -fla -mllvm -bcf -mllvm -bcf_loop=3 -mllvm -bcf_prob=10 -D_CRYPTOPP_CXX98_UNCAUGHT_EXCEPTION -Wnon-pod-varargs %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

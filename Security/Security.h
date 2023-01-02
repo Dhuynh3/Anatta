@@ -12,8 +12,10 @@
 #include <iomanip>
 #include <filesystem>
 
+
 #pragma comment(lib, "ntdll.lib")
 
+#include "base64.h"
 #include "../Anatta.h"
 
 
@@ -38,5 +40,7 @@ public:
 	pfnNtTerminateThread NtTerminateThread{ nullptr };
 	int test = 0;
 };
+
+extern Security Secure;
 
 #endif SECURITY_H

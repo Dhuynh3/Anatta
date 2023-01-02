@@ -7,87 +7,64 @@
 
 
 
-/**
-* This thread sets up important handlers for a websocket connection with our server.
-*/
-PVOID WebSocketThread(void*) {
 
-	// Set the message handler, this is called when a message is received.
-	Connect.wsPtr->setMessageHandler([](const std::string& message, const WebSocketClientPtr&, const WebSocketMessageType& type) {
-
-		// Find the correct message type.
-		std::string messageType = "Unknown";
-
-		switch (type) {
-			case WebSocketMessageType::Text: {
-				messageType = "text";
-				break;
-			}
-			case WebSocketMessageType::Pong: {
-				messageType = "pong";
-				break;
-			}
-			case WebSocketMessageType::Ping: {
-				messageType = "ping";
-				break;
-			}
-			case WebSocketMessageType::Binary: {
-				messageType = "binary";
-				break;
-			}
-			case WebSocketMessageType::Close: {
-				messageType = "Close";
-				break;
-			}
-		}
-
-		LOG_INFO << "new message (" << messageType << "): " << message;
-
-	});
-
-	// Set the connection closed handler.
-	Connect.wsPtr->setConnectionClosedHandler([](const WebSocketClientPtr&) {
-
-		// Once the connection is closed, log it. TODO - Uninstall hooks, etc.
-
-		LOG_INFO << "WebSocket connection closed!";
-		});
-
-	// Connect to the server.
-	Connect.wsPtr->connectToServer(Connect.req, [](ReqResult r, const HttpResponsePtr&, const WebSocketClientPtr& wsPtr) {
-
-		// Check if the connection was successful.
-		if (r != ReqResult::Ok) {
-			LOG_ERROR << "Failed to establish WebSocket connection!";
-			wsPtr->stop();
-			return;
-		}
-
-	LOG_INFO << "WebSocket connected!";
-
-	printf("WsPtr2 %p\n", wsPtr.get());
-
-	wsPtr->getConnection()->setPingMessage("", 2s);
-	wsPtr->getConnection()->send("hello!");
-
-	});
-
-
-	// Run the websocket client after all handlers have been setup.
-	Connect.Run();
-
-	return 0;
-}
 
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) {
 
-	Security Begin;
-	Begin.AllocateConsole();
+	
+	Secure.AllocateConsole();
+
+	
+	Integer n("0xbeaadb3d839f3b5f"), e("0x11"), d("0x21a5ae37b9959db9");
+
+	RSA::PublicKey pubKey;
+	pubKey.Initialize(n, e);
+
+	Integer m, c;
+	string message = "secret";
+
+	cout << "message: " << message << endl;
+
+	// Treat the message as a big endian byte array
+	m = Integer((const CryptoPP::byte*)message.data(), message.size());
+	cout << "m: " << hex << m << endl;
+
+	// Encrypt
+	c = pubKey.ApplyFunction(m);
+	cout << "c: " << hex << c << endl;
+	
+	//// Decryption
+
+	RSA::PrivateKey privKey;
+	privKey.Initialize(n, e, d);
+
+	///////////////////////////////////////////////////////////////
+
+	AutoSeededRandomPool prng;
+	Integer x("0x3f47c32e8e17e291"), r;
+	string recovered;
+
+	// Decrypt
+	r = privKey.CalculateInverse(prng, x);
+	cout << "r: " << hex << r << endl;
+
+	// Round trip the message
+	size_t req = r.MinEncodedSize();
+	recovered.resize(req);
+	r.Encode((CryptoPP::byte*)recovered.data(), recovered.size());
+
+	cout << "recovered: " << recovered << endl;
 
 	
 
-	Begin.RunThread(WebSocketThread, "WebSocket", 0);
+
+	
+
+
+	
+	
+	Secure.RunThread(WebSocketThread, "WebSocket", 0);
 
 	
 	while (true) {

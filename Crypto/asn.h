@@ -101,7 +101,7 @@ enum ASNIdFlag
 };
 
 /// \brief Raises a BERDecodeErr
-inline void BERDecodeError() {throw BERDecodeErr();}
+inline void BERDecodeError() {/*throw BERDecodeErr();*/}
 
 /// \brief Exception thrown when an unknown object identifier is encountered
 class CRYPTOPP_DLL UnknownOID : public BERDecodeErr

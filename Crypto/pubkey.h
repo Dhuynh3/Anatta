@@ -326,9 +326,9 @@ public:
 	bool IsProbabilistic() const
 		{return true;}
 	bool AllowNonrecoverablePart() const
-		{throw NotImplemented("PK_MessageEncodingMethod: this signature scheme does not support message recovery");}
+		{/*throw NotImplemented("PK_MessageEncodingMethod: this signature scheme does not support message recovery");*/}
 	virtual bool RecoverablePartFirst() const
-		{throw NotImplemented("PK_MessageEncodingMethod: this signature scheme does not support message recovery");}
+		{/*throw NotImplemented("PK_MessageEncodingMethod: this signature scheme does not support message recovery");*/}
 
 	// for verification, DL
 	virtual void ProcessSemisignature(HashTransformation &hash, const byte *semisignature, size_t semisignatureLength) const
@@ -361,7 +361,7 @@ public:
 		byte *recoveredMessage) const
 		{CRYPTOPP_UNUSED(hash);CRYPTOPP_UNUSED(hashIdentifier); CRYPTOPP_UNUSED(messageEmpty);
 		CRYPTOPP_UNUSED(representative); CRYPTOPP_UNUSED(representativeBitLength); CRYPTOPP_UNUSED(recoveredMessage);
-		throw NotImplemented("PK_MessageEncodingMethod: this signature scheme does not support message recovery");}
+		/*throw NotImplemented("PK_MessageEncodingMethod: this signature scheme does not support message recovery");*/}
 
 	virtual DecodingResult RecoverMessageFromSemisignature(		// for DL
 		HashTransformation &hash, HashIdentifier hashIdentifier,
@@ -370,7 +370,7 @@ public:
 		byte *recoveredMessage) const
 		{CRYPTOPP_UNUSED(hash);CRYPTOPP_UNUSED(hashIdentifier); CRYPTOPP_UNUSED(presignature); CRYPTOPP_UNUSED(presignatureLength);
 		CRYPTOPP_UNUSED(semisignature); CRYPTOPP_UNUSED(semisignatureLength); CRYPTOPP_UNUSED(recoveredMessage);
-		throw NotImplemented("PK_MessageEncodingMethod: this signature scheme does not support message recovery");}
+		/*throw NotImplemented("PK_MessageEncodingMethod: this signature scheme does not support message recovery");*/}
 
 	// VC60 workaround
 	struct HashIdentifierLookup

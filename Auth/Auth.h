@@ -23,10 +23,7 @@ public:
 	void Run();
 	void PrintConnectionDetails();
 
-	
-	
-	
-	
+		
 	drogon::WebSocketClientPtr wsPtr{ NULL };
 	drogon::HttpRequestPtr req{ NULL };
 	std::string server{ ("") };
@@ -37,5 +34,7 @@ public:
 };
 
 extern Connection Connect;
+
+extern PVOID WebSocketThread(void*);
 
 #endif AUTH_H

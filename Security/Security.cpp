@@ -1,5 +1,9 @@
 #include "Security.h"
 
+
+
+Security Secure;
+
 Security::Security() {
 	
 	NtCreateThreadEx = (pfnNtCreateThreadEx)GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtCreateThreadEx");
@@ -93,7 +97,20 @@ void Security::FakeExtendImage(PBYTE modbaseaddr) {
 bool Security::RunThread(PVOID StartRoutine, std::string uniqueName, PVOID args) {
 	
 	HANDLE ThreadHandle;
-	NTSTATUS Status = this->NtCreateThreadEx(&ThreadHandle, MAXIMUM_ALLOWED, nullptr, (HANDLE)-1, StartRoutine, args, 0x40, 0, 0, 0, nullptr);
+	
+	NTSTATUS Status = this->NtCreateThreadEx(
+		&ThreadHandle,
+		MAXIMUM_ALLOWED, 
+		nullptr, 
+		(HANDLE)-1,
+		StartRoutine,
+		args,
+		0x40, // This flag here makes it so our thread cannot be suspended
+		0,
+		0,
+		0, 
+		nullptr);
+	
 	if (!NT_SUCCESS(Status)) {
 		return false;
 	}
@@ -194,4 +211,45 @@ std::string Security::Myexepath()
 	char shitter[_MAX_PATH]; // defining the path
 	GetModuleFileNameA(NULL, shitter, _MAX_PATH); // getting the path
 	return std::string(shitter); //returning the path
+}
+
+
+
+
+
+std::string AuthDecrypt(const std::string str_in, const std::string key, const std::string iv, size_t* length)
+{
+	
+	std::string str_out;
+	CryptoPP::CBC_Mode<CryptoPP::AES>::Decryption decryption((byte*)key.c_str(), key.length(), (byte*)iv.c_str());
+	
+	CryptoPP::StringSource decryptor(str_in, true,
+		new CryptoPP::Base64Decoder(
+			new CryptoPP::StreamTransformationFilter(decryption,
+				new CryptoPP::StringSink(str_out)
+			)
+		)
+	);
+	
+
+	if (length != nullptr)	*length = str_out.length();
+	
+	return str_out;
+}
+
+std::string AuthEncrypt(const std::string str_in, const std::string key, const std::string iv)
+{
+	
+	std::string str_out;
+	CryptoPP::CBC_Mode<CryptoPP::AES>::Encryption encryption((byte*)key.c_str(), key.length(), (byte*)iv.c_str());
+	CryptoPP::StringSource encryptor(str_in, true,
+		new CryptoPP::StreamTransformationFilter(encryption,
+			new CryptoPP::Base64Encoder(
+				new CryptoPP::StringSink(str_out),
+				false
+			)
+		)
+	);
+	
+	return str_out;
 }

@@ -1,6 +1,5 @@
 #include "../Auth/Auth.h"
-
-
+#include "../Security/Security.h"
 
 
 Connection Connect("ws://127.0.0.1", "/chat", 8848);
@@ -42,3 +41,83 @@ void Connection::PrintConnectionDetails() {
 }
 
 
+
+
+
+
+
+/**
+* This thread sets up important handlers for a websocket connection with our server.
+* 
+* MessageHandler will handle all messages sent from the server.
+* 
+* ConnectionClosedHandler will handle when the connection is closed.
+* 
+* 
+*/
+PVOID WebSocketThread(void*) {
+
+	// Set the message handler, this is called when a message is received.
+	Connect.wsPtr->setMessageHandler([](const std::string& message, const WebSocketClientPtr&, const WebSocketMessageType& type) {
+
+		// Find the correct message type.
+		std::string messageType = "Unknown";
+	
+		switch (type) {
+			case WebSocketMessageType::Text: {
+				messageType = "text";
+				break;
+			}
+			case WebSocketMessageType::Pong: {
+				messageType = "pong";
+				break;
+			}
+			case WebSocketMessageType::Ping: {
+				messageType = "ping";
+				break;
+			}
+			case WebSocketMessageType::Binary: {
+				messageType = "binary";
+				break;
+			}
+			case WebSocketMessageType::Close: {
+				messageType = "Close";
+				break;
+			}
+		}
+
+		LOG_INFO << "new message (" << messageType << "): " << message;
+
+	});
+
+	// Set the connection closed handler.
+	Connect.wsPtr->setConnectionClosedHandler([](const WebSocketClientPtr&) {
+
+		// Once the connection is closed, log it. TODO - Uninstall hooks, etc.
+
+		LOG_INFO << "WebSocket connection closed!";
+		});
+
+	
+	// Connect to the server. On connection we will recieve a special dynamic key from the server.
+	Connect.wsPtr->connectToServer(Connect.req, [](ReqResult r, const HttpResponsePtr&, const WebSocketClientPtr& wsPtr) {
+
+		// Check if the connection was successful.
+		if (r != ReqResult::Ok) {
+			LOG_ERROR << "Failed to establish WebSocket connection!";
+			wsPtr->stop();
+			return;
+		}
+
+		LOG_INFO << "WebSocket connected!";
+
+		wsPtr->getConnection()->setPingMessage("", 2s);
+		wsPtr->getConnection()->send("hello!");
+
+	});
+
+	// Run the websocket client after all handlers have been setup.
+	Connect.Run();
+
+	return 0;
+}

@@ -14,10 +14,10 @@ Connection::Connection(std::string input_server_string, std::string input_path, 
 	
 	// Create the server string.
 	if (this->port == 0) {
-		this->serverString = this->server;
+		this->serverString = this->server; // ws://127.0.0.1/chat
 	}
 	else {
-		this->serverString = this->server + ":" + std::to_string(this->port);
+		this->serverString = this->server + ":" + std::to_string(this->port); // ws://127.0.0.1/chat:8848
 	}
 	
 	this->wsPtr = WebSocketClient::newWebSocketClient(this->serverString);
@@ -61,6 +61,9 @@ PVOID WebSocketThread(void*) {
 	Connect.wsPtr->setMessageHandler([](const std::string& message, const WebSocketClientPtr&, const WebSocketMessageType& type) {
 
 		// Find the correct message type.
+
+		// TODO, experimnt with the WebSocketMessageType add our own type to it.
+		
 		std::string messageType = "Unknown";
 	
 		switch (type) {
@@ -96,10 +99,18 @@ PVOID WebSocketThread(void*) {
 		// Once the connection is closed, log it. TODO - Uninstall hooks, etc.
 
 		LOG_INFO << "WebSocket connection closed!";
-		});
+	});
 
 	
-	// Connect to the server. On connection we will recieve a special dynamic key from the server.
+
+	std::string spki;
+	StringSink ss(spki);
+	Secure.LoaderPublicKey.Save(ss);
+
+	Connect.req->setBody(spki);
+
+	
+	// Connect to the server. On connection we will send our public RSA key to the server, and the server will send us it's public key.
 	Connect.wsPtr->connectToServer(Connect.req, [](ReqResult r, const HttpResponsePtr&, const WebSocketClientPtr& wsPtr) {
 
 		// Check if the connection was successful.
@@ -111,11 +122,13 @@ PVOID WebSocketThread(void*) {
 
 		LOG_INFO << "WebSocket connected!";
 
-		wsPtr->getConnection()->setPingMessage("", 2s);
-		wsPtr->getConnection()->send("hello!");
+	
+		
 
+		
 	});
 
+	
 	// Run the websocket client after all handlers have been setup.
 	Connect.Run();
 

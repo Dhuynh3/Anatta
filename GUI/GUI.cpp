@@ -19,7 +19,7 @@ GUI::GUI(int nCmdSh, HINSTANCE hInst) {
 	wc.hCursor = LoadCursor(NULL, IDC_CROSS);
 	wc.hbrBackground = CreateSolidBrush(RGB(34, 34, 34));
 	wc.lpfnWndProc = MessageRouter;
-	wc.lpszClassName = L"Hello";
+	wc.lpszClassName = L"CiceroUIWndFrame";
 	wc.style = CS_VREDRAW | CS_HREDRAW;
 
 	if (!RegisterClassEx(&wc)) {
@@ -56,6 +56,7 @@ int GUI::Run()
 	
 }
 
+
 LRESULT CALLBACK GUI::MessageRouter(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	GUI* app;
@@ -76,6 +77,7 @@ LRESULT CALLBACK GUI::MessageRouter(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 	//We call the actual WndProc. This one is a member of the class and has access to its members
 	return app->WndProc(hWnd, msg, wParam, lParam);
 }
+
 
 LRESULT CALLBACK GUI::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {

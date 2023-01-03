@@ -8,12 +8,6 @@
 using namespace drogon;
 using namespace std::chrono_literals;
 
-
-
-
-
-
-
 /**
 * This class will allow the loader to connect to our server and authenticate the loader.
 */

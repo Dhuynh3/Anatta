@@ -34,11 +34,19 @@ public:
 	
 	std::wstring RandomWString(size_t length);
 
+
+	std::string RSA_Encrypt(std::string input, RSA::PublicKey publickey);
+	std::string RSA_Decrypt(std::string input, RSA::PrivateKey privatekey);
+	
 	
 	std::map<std::string, HANDLE> tHandleList;
 	pfnNtCreateThreadEx NtCreateThreadEx{ nullptr };
 	pfnNtTerminateThread NtTerminateThread{ nullptr };
 	int test = 0;
+
+	AutoSeededRandomPool rng;
+	RSA::PrivateKey LoaderPrivateKey;
+	RSA::PublicKey LoaderPublicKey;
 };
 
 extern Security Secure;

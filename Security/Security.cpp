@@ -4,11 +4,16 @@
 
 Security Secure;
 
+/**
+* The constructor class security runs once
+*/
 Security::Security() {
 	
+	// Dynamically grab Nt routines
 	NtCreateThreadEx = (pfnNtCreateThreadEx)GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtCreateThreadEx");
 	NtTerminateThread = (pfnNtTerminateThread)GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtTerminateThread");
 
+	
 }
 
 bool Security::AllocateConsole() {
@@ -252,4 +257,35 @@ std::string AuthEncrypt(const std::string str_in, const std::string key, const s
 	);
 	
 	return str_out;
+}
+
+
+std::string Security::RSA_Encrypt(std::string input, RSA::PublicKey publickey) {
+
+	RSAES_OAEP_SHA_Encryptor e(publickey);
+	AutoSeededRandomPool rnge;
+	std::string cipher;
+
+	StringSource ss1(input, true,
+		new PK_EncryptorFilter(rnge, e,
+			new StringSink(cipher)
+		) // PK_EncryptorFilter
+	); // StringSource
+
+	return cipher;
+}
+
+std::string Security::RSA_Decrypt(std::string input, RSA::PrivateKey privatekey) {
+
+	RSAES_OAEP_SHA_Decryptor d(privatekey);
+	AutoSeededRandomPool rngd;
+	std::string recovered;
+
+	StringSource ss2(input, true,
+		new PK_DecryptorFilter(rngd, d,
+			new StringSink(recovered)
+		) // PK_DecryptorFilter
+	); // StringSource
+
+	return recovered;
 }

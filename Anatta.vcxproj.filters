@@ -37,6 +37,12 @@
     <Filter Include="Header Files\Injection">
       <UniqueIdentifier>{626a3819-25fa-4ec6-a587-63b96e34de2a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Hwid">
+      <UniqueIdentifier>{2807a1c2-7841-4dc8-8758-26713013bb48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Hwid">
+      <UniqueIdentifier>{03509843-5af7-4c5f-b582-b38416fde44e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Anatta.cpp">
@@ -50,6 +56,12 @@
     </ClCompile>
     <ClCompile Include="Auth\Auth.cpp">
       <Filter>Source Files\Auth</Filter>
+    </ClCompile>
+    <ClCompile Include="Hwid\Hwid.cpp">
+      <Filter>Source Files\Hwid</Filter>
+    </ClCompile>
+    <ClCompile Include="Injection\Exploit.cpp">
+      <Filter>Source Files\Injection</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -67,6 +79,12 @@
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Hwid\Hwid.h">
+      <Filter>Header Files\Hwid</Filter>
+    </ClInclude>
+    <ClInclude Include="Injection\Exploit.h">
+      <Filter>Header Files\Injection</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

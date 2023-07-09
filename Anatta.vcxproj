@@ -152,12 +152,16 @@
     <ClCompile Include="Anatta.cpp" />
     <ClCompile Include="Auth\Auth.cpp" />
     <ClCompile Include="GUI\GUI.cpp" />
+    <ClCompile Include="Hwid\Hwid.cpp" />
+    <ClCompile Include="Injection\Exploit.cpp" />
     <ClCompile Include="Security\Security.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Anatta.h" />
     <ClInclude Include="Auth\Auth.h" />
     <ClInclude Include="GUI\GUI.h" />
+    <ClInclude Include="Hwid\Hwid.h" />
+    <ClInclude Include="Injection\Exploit.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Security\Security.h" />
   </ItemGroup>

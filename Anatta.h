@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <winternl.h>
 
+#include "../Drogon/include/json/json.h"
 #include "rijndael.h"
 #include "modes.h"
 #include "files.h"
@@ -252,5 +253,13 @@ struct GuiParams {
 	HINSTANCE hInst;
 };
 
+struct ExploitParams {
+	std::string result;
+};
+
+
+struct ResultsParams {
+	Json::Value result;
+};
 
 #endif ANATTA_H

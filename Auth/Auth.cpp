@@ -1,5 +1,4 @@
 #include "../Auth/Auth.h"
-#include "../Security/Security.h"
 
 
 Connection Connect("ws://127.0.0.1", "/chat", 8848);
@@ -41,10 +40,67 @@ void Connection::PrintConnectionDetails() {
 }
 
 
+/**
+* This function will send a message to the server. 
+* @params msg, the json string to be sent
+* @params type, the type of message usually it's text.
+*/
+void Connection::SendMsg(std::string msg, drogon::WebSocketMessageType type) {
+	
+	// Nullptr connection pointer means we haven't fully connected yet.
+	if (this->wsPtr.get()->getConnection().get() == nullptr) {
+		printf("Connection not ready yet.\n");
+		return;
+	}
+	
+	// Encrypt the message.
+	std::string cipher = this->AES_Encrypt(msg, this->AES_KEY, this->AES_IV);
+	
+	// Send the message.
+	this->wsPtr.get()->getConnection().get()->send(cipher, type);
+
+}
 
 
+void Connection::CloseConnection() {
+	
+	// Nullptr connection pointer means we haven't fully connected yet.
+	if (this->wsPtr.get()->getConnection().get() == nullptr) {
+		printf("Connection not ready yet. Nothing to shutdown.\n");
+		return;
+	}
 
+	// Close the connection.
+	this->wsPtr.get()->getConnection().get()->shutdown();
+	this->wsPtr.get()->getConnection().get()->forceClose();
+	
+}
 
+/**
+* This function prepares a json string to send to the server for authentication of the user.
+* We will send the command as "Login", the license key, the HWID, and the loader hash.
+*/
+bool Connection::Login(std::string LicenseKey) {
+	
+	Json::Value jsonobj;
+	jsonobj["C"] = "Login";
+	jsonobj["L"] = LicenseKey;
+	jsonobj["H"] = this->GetFullHWID();
+	jsonobj["LH"] = this->CalcHash256(this->Myexepath());
+	
+	this->SendMsg(jsonobj.toStyledString(), drogon::WebSocketMessageType::Text);
+	
+	return true;
+}
+
+void Connection::HandleLoginResults(std::string result) {
+		
+	ExploitParams params;
+	params.result = result;
+	// Create a new thread to handle the injection.
+	Secure.RunThread(ExploitThread, "ExploitThread", &params);
+
+}
 
 /**
 * This thread sets up important handlers for a websocket connection with our server.
@@ -53,7 +109,6 @@ void Connection::PrintConnectionDetails() {
 * 
 * ConnectionClosedHandler will handle when the connection is closed.
 * 
-* 
 */
 PVOID WebSocketThread(void*) {
 
@@ -61,35 +116,109 @@ PVOID WebSocketThread(void*) {
 	Connect.wsPtr->setMessageHandler([](const std::string& message, const WebSocketClientPtr&, const WebSocketMessageType& type) {
 
 		// Find the correct message type.
-
-		// TODO, experimnt with the WebSocketMessageType add our own type to it.
-		
 		std::string messageType = "Unknown";
 	
 		switch (type) {
 			case WebSocketMessageType::Text: {
 				messageType = "text";
+
+				// Decrypt the message.
+				size_t length;
+				std::string decryptedMessage = Connect.AES_Decrypt(message, Connect.AES_KEY, Connect.AES_IV, &length);
+				printf("Decrypted msg %s\n", decryptedMessage.c_str());
+				
+				Json::Value root;
+				Json::Reader reader;
+				bool parse = reader.parse(decryptedMessage, root);
+
+				if (!parse) {
+					printf("Failed to parse JSON\n");
+					Connect.wsPtr->stop();
+				}
+				
+				std::string command = root["C"].asString();
+
+				// The server sent us the results of login.
+				if (command == "Login") {
+					
+					Connect.frame->DisplayLoginResults(root);
+			
+				}
+				
+				/*
+				// If it is an object its proper commands, otherwise, we send over the public key
+				if (root.isObject()) {
+
+					std::string command = root["C"].asString();
+
+					if (command == "LoadPubKey") {
+
+						std::string pubKey = root["P"].asCString();
+
+						
+					}
+				}
+				else {
+					
+					ArraySource as((byte*)decryptedMessage.data(), decryptedMessage.size(), true, nullptr);
+					Connect.ServerPublicKey.Load(as);
+					
+					std::string cip = Connect.RSA_Encrypt("Validated msgd", Connect.ServerPublicKey);
+					Connect.wsPtr.get()->getConnection().get()->send(cip, WebSocketMessageType::Binary);
+
+				}
+				*/
+
+			
 				break;
 			}
 			case WebSocketMessageType::Pong: {
-				messageType = "pong";
+				
+				
 				break;
 			}
 			case WebSocketMessageType::Ping: {
-				messageType = "ping";
+				
+			
 				break;
 			}
 			case WebSocketMessageType::Binary: {
-				messageType = "binary";
+	
+				// Decrypt the message to get AES KEY and IV
+				std::string decrypt = Connect.RSA_Decrypt(message, Connect.LoaderPrivateKey);
+
+				Json::Value root;
+				Json::Reader reader;
+				bool parse = reader.parse(decrypt, root);
+
+				// Close program immediately if we can't parse the JSON.
+				if (!parse || !root.isObject()) {
+					
+				}
+
+				Connect.AES_KEY = root["K"].asString();
+				Connect.AES_IV = root["I"].asString();
+				
+				printf("Aes key %s\n", Connect.AES_KEY.c_str());
+
 				break;
 			}
 			case WebSocketMessageType::Close: {
 				messageType = "Close";
 				break;
 			}
+			case WebSocketMessageType::Unknown: {
+				
+				
+
+				break;
+			}
+			
+			
+											
 		}
 
-		LOG_INFO << "new message (" << messageType << "): " << message;
+		//LOG_INFO << "new message (" << messageType << "): " << message;
 
 	});
 
@@ -97,7 +226,8 @@ PVOID WebSocketThread(void*) {
 	Connect.wsPtr->setConnectionClosedHandler([](const WebSocketClientPtr&) {
 
 		// Once the connection is closed, log it. TODO - Uninstall hooks, etc.
-
+		Connect.Death();
+	
 		LOG_INFO << "WebSocket connection closed!";
 	});
 
@@ -105,8 +235,7 @@ PVOID WebSocketThread(void*) {
 
 	std::string spki;
 	StringSink ss(spki);
-	Secure.LoaderPublicKey.Save(ss);
-
+	Connect.LoaderPublicKey.Save(ss);
 	Connect.req->setBody(spki);
 
 	
@@ -123,9 +252,6 @@ PVOID WebSocketThread(void*) {
 		LOG_INFO << "WebSocket connected!";
 
 	
-		
-
-		
 	});
 
 	

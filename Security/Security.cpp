@@ -13,7 +13,6 @@ Security::Security() {
 	NtCreateThreadEx = (pfnNtCreateThreadEx)GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtCreateThreadEx");
 	NtTerminateThread = (pfnNtTerminateThread)GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtTerminateThread");
 
-	
 }
 
 bool Security::AllocateConsole() {
@@ -142,6 +141,7 @@ bool Security::CloseThread(std::string uniqueName) {
 	return false; // Thread not found.
 }
 
+
 std::wstring Security::RandomWString(size_t length)
 {
 	srand(time(NULL));
@@ -221,8 +221,10 @@ std::string Security::Myexepath()
 
 
 
-
-std::string AuthDecrypt(const std::string str_in, const std::string key, const std::string iv, size_t* length)
+/**
+* This function decrypts a string using AES256.
+*/
+std::string Security::AES_Decrypt(const std::string str_in, const std::string key, const std::string iv, size_t* length)
 {
 	
 	std::string str_out;
@@ -236,13 +238,15 @@ std::string AuthDecrypt(const std::string str_in, const std::string key, const s
 		)
 	);
 	
-
 	if (length != nullptr)	*length = str_out.length();
 	
 	return str_out;
 }
 
-std::string AuthEncrypt(const std::string str_in, const std::string key, const std::string iv)
+/*
+* This function encrypts a string using AES256.
+*/
+std::string Security::AES_Encrypt(const std::string str_in, const std::string key, const std::string iv)
 {
 	
 	std::string str_out;
@@ -259,7 +263,9 @@ std::string AuthEncrypt(const std::string str_in, const std::string key, const s
 	return str_out;
 }
 
-
+/**
+* This function encrypts a string using RSA.
+*/
 std::string Security::RSA_Encrypt(std::string input, RSA::PublicKey publickey) {
 
 	RSAES_OAEP_SHA_Encryptor e(publickey);
@@ -275,6 +281,9 @@ std::string Security::RSA_Encrypt(std::string input, RSA::PublicKey publickey) {
 	return cipher;
 }
 
+/**
+* This function decrypts a string using RSA.
+*/
 std::string Security::RSA_Decrypt(std::string input, RSA::PrivateKey privatekey) {
 
 	RSAES_OAEP_SHA_Decryptor d(privatekey);
@@ -288,4 +297,17 @@ std::string Security::RSA_Decrypt(std::string input, RSA::PrivateKey privatekey)
 	); // StringSource
 
 	return recovered;
+}
+
+
+
+void Security::Death() {
+	int a = 0;
+	a += 1;
+	int j = 1;
+	Death();
+	std::quick_exit(0);
+	* ((unsigned int*)0) = 0xDEAD;
+	exit(0);
+	j -= 1;
 }

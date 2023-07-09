@@ -17,10 +17,11 @@
 
 #include "base64.h"
 #include "../Anatta.h"
+#include "../Hwid/Hwid.h"
 
 
 
-class Security {
+class Security : public HWID {
 public:
 	Security(); 
 	bool AllocateConsole();
@@ -28,6 +29,9 @@ public:
 	bool CloseThread(std::string uniqueName);
 	bool DebuggerCheck(PVOID args);
 	void FakeExtendImage(PBYTE modbaseaddr);
+
+	void Death();
+
 	std::string GetTextHash();
 	std::string CalcHash256(const std::filesystem::path& p);
 	std::string Myexepath();
@@ -39,6 +43,12 @@ public:
 	std::string RSA_Decrypt(std::string input, RSA::PrivateKey privatekey);
 	
 	
+
+
+	std::string AES_Decrypt(const std::string str_in, const std::string key, const std::string iv, size_t* length);
+	std::string AES_Encrypt(const std::string str_in, const std::string key, const std::string iv);
+
+	
 	std::map<std::string, HANDLE> tHandleList;
 	pfnNtCreateThreadEx NtCreateThreadEx{ nullptr };
 	pfnNtTerminateThread NtTerminateThread{ nullptr };
@@ -47,6 +57,11 @@ public:
 	AutoSeededRandomPool rng;
 	RSA::PrivateKey LoaderPrivateKey;
 	RSA::PublicKey LoaderPublicKey;
+
+	RSA::PublicKey ServerPublicKey;
+
+	std::string AES_KEY{ ("") };
+	std::string AES_IV{ ("") };
 };
 
 extern Security Secure;

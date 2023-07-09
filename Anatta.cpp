@@ -8,35 +8,39 @@
 
 
 
-
+/**
+* This function is the application's entrypoint.
+*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) {
 
+	// Open console for debugging.
+	Connect.AllocateConsole();
 	
-	Secure.AllocateConsole();
-
-
+	// Generate an RSA keypair.
 	InvertibleRSAFunction params;
 	params.GenerateRandomWithKeySize(Secure.rng, 3072);
+	Connect.LoaderPrivateKey = RSA::PrivateKey(params);
+	Connect.LoaderPublicKey = RSA::PublicKey(Connect.LoaderPrivateKey);
 	
-	Secure.LoaderPrivateKey = RSA::PrivateKey(params);
-	Secure.LoaderPublicKey = RSA::PublicKey(Secure.LoaderPrivateKey);
-	
+	// Test functions
+	std::string exehash = Secure.CalcHash256(Secure.Myexepath());
+	printf("My hash %s\n", exehash.c_str());
 
+	printf("Final HWID %s\n", Secure.GetFullHWID().c_str());
+
+	// Run the websocket thread.
 	Secure.RunThread(WebSocketThread, "WebSocket", 0);
 
+	// Run the GUI thread
+	GuiParams guip;
+	guip.cmdshow = ncmdshow;
+	guip.hInst = hInst;
+	Secure.RunThread(MainForm, "MainForm", &guip);
 	
+	// Loop is needed to keep the other threads running.
 	while (true) {
-		printf("Heartbeat\n");
-		
-		printf("Connection %p\n", Connect.wsPtr.get()->getConnection().get());
-
-		if (Connect.wsPtr.get()->getConnection().get() != nullptr) {
-			//Connect.wsPtr.get()->getConnection().get()->send("yeeeeee!");
-		}
-	
-		
 		Sleep(1000);
 	}
-
+	
 	return 0;
 }

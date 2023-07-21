@@ -45,15 +45,21 @@ public:
 	HWND logoWindow{ NULL };
 	HWND windowHandle{ NULL };
 	//HWND edit_handle{ NULL };
+
+	// Value stored
 	HINSTANCE loader_handle { NULL };
 	
 
 	std::map<std::string, std::pair<HWND, HMENU>> WindowHandleList; // O(Log N), we will use this Key-Value pair container to store all the HWNDs and associated HMENU for the buttons with a unique name.
 	
 
+	// Value stored from calling constructor
 	int cmd_show { NULL };
+
+	// Value grabbed from GetSystemMetrics
 	int ScreenX { NULL };
 	int ScreenY { NULL };
+	
 	int MenuX{ 300 };
 	int MenuY{ 350 };
 private:

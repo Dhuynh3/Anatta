@@ -43,6 +43,18 @@
     <Filter Include="Header Files\Hwid">
       <UniqueIdentifier>{03509843-5af7-4c5f-b582-b38416fde44e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\NewFilter1">
+      <UniqueIdentifier>{9f09c3ee-4fdf-4ca0-abcc-03dd9c0ce0dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Interface">
+      <UniqueIdentifier>{a1d957a3-a2ab-4d77-9436-37124555de4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ClientInterface">
+      <UniqueIdentifier>{b00cb5b0-0fa8-4c40-981d-2c156fc956e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ClientInterface">
+      <UniqueIdentifier>{a5be2674-79a1-4907-9fa5-052b5c7adebf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Anatta.cpp">
@@ -62,6 +74,9 @@
     </ClCompile>
     <ClCompile Include="Injection\Exploit.cpp">
       <Filter>Source Files\Injection</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientInterface.cpp">
+      <Filter>Source Files\ClientInterface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -85,6 +100,9 @@
     </ClInclude>
     <ClInclude Include="Injection\Exploit.h">
       <Filter>Header Files\Injection</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientInterface\ClientInterface.h">
+      <Filter>Header Files\ClientInterface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

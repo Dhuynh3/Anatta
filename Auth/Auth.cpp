@@ -28,10 +28,10 @@ Connection::Connection(std::string input_server_string, std::string input_path, 
 void Connection::Run() {
 	
 	// For debugging outputs.
-    app().setLogLevel(trantor::Logger::kDebug);
+    //app().setLogLevel(trantor::Logger::kDebug);
 
 	// Run the websocket client and begin connection. This should be called in a seperate thread.
-    app().run();
+   // app().run();
     
 }
 

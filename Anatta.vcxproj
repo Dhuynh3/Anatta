@@ -151,6 +151,7 @@
   <ItemGroup>
     <ClCompile Include="Anatta.cpp" />
     <ClCompile Include="Auth\Auth.cpp" />
+    <ClCompile Include="ClientInterface.cpp" />
     <ClCompile Include="GUI\GUI.cpp" />
     <ClCompile Include="Hwid\Hwid.cpp" />
     <ClCompile Include="Injection\Exploit.cpp" />
@@ -159,6 +160,7 @@
   <ItemGroup>
     <ClInclude Include="Anatta.h" />
     <ClInclude Include="Auth\Auth.h" />
+    <ClInclude Include="ClientInterface\ClientInterface.h" />
     <ClInclude Include="GUI\GUI.h" />
     <ClInclude Include="Hwid\Hwid.h" />
     <ClInclude Include="Injection\Exploit.h" />

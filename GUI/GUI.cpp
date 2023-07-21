@@ -12,9 +12,9 @@ GUI::GUI(int nCmdSh, HINSTANCE hInst) {
 	this->cmd_show = nCmdSh; // 1 = Show window 0 = hide window
 	this->loader_handle = hInst; // Handle to the loader
 	
-	// Grab screen size X, Y.
-	ScreenX = GetSystemMetrics(SM_CXSCREEN);
-	ScreenY = GetSystemMetrics(SM_CYSCREEN);
+	// Grab screen size X, Y of the primary monitor
+	this->ScreenX = GetSystemMetrics(SM_CXSCREEN);
+	this->ScreenY = GetSystemMetrics(SM_CYSCREEN);
 
 	WNDCLASSEXW wc { 0 };
 	SecureZeroMemory(&wc, sizeof(wc));
@@ -45,7 +45,6 @@ GUI::GUI(int nCmdSh, HINSTANCE hInst) {
 		UpdateWindow(windowHandle);
 	}
 
-	
 }
 
 int GUI::Run()
@@ -93,10 +92,9 @@ LRESULT CALLBACK GUI::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE: {
 
-	
-		this->logoWindow = CreateWindowA(("Static"), "", WS_CHILD | SS_BITMAP | WS_VISIBLE, 0, 0, NULL, NULL, hWnd, NULL, GetModuleHandle(NULL), NULL);
-
-		SendMessage(this->logoWindow, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)LoadBitmap(this->loader_handle, MAKEINTRESOURCE(IDB_BITMAP1)));
+		
+		//this->logoWindow = CreateWindowA(("Static"), "", WS_CHILD | SS_BITMAP | WS_VISIBLE, 0, 0, NULL, NULL, hWnd, NULL, GetModuleHandle(NULL), NULL);
+		//SendMessage(this->logoWindow, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)LoadBitmap(this->loader_handle, MAKEINTRESOURCE(IDB_BITMAP1)));
 
 
 
@@ -255,9 +253,18 @@ LRESULT CALLBACK GUI::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					SetTextColor(lpds->hDC, RGB(255, 255, 255));
 					
 					// + 20 on the left to center the text
-					ExtTextOutA(lpds->hDC, lpds->rcItem.left + 20, lpds->rcItem.top, ETO_OPAQUE | ETO_CLIPPED, &lpds->rcItem, staticText, strlen(staticText), NULL);
-					DrawEdge(lpds->hDC, &lpds->rcItem, (lpds->itemState & ODS_SELECTED) ? EDGE_SUNKEN : EDGE_RAISED, BF_MONO); //BF_MONO //BF_RECT
+					//ExtTextOutA(lpds->hDC, lpds->rcItem.left + 20, lpds->rcItem.top, ETO_OPAQUE | ETO_CLIPPED, &lpds->rcItem, staticText, strlen(staticText), NULL);
+					ExtTextOutA(lpds->hDC, ((lpds->rcItem.left + lpds->rcItem.right) / 2), lpds->rcItem.top, ETO_OPAQUE | ETO_CLIPPED, &lpds->rcItem, staticText, strlen(staticText), NULL);
 					
+	
+					//DrawEdge(lpds->hDC, &lpds->rcItem, (lpds->itemState & ODS_SELECTED) ? EDGE_SUNKEN : EDGE_RAISED, BF_RECT); //BF_MONO //BF_RECT
+
+					// Perform bitwise AND to check if the button is pressed.
+					if (lpds->itemState & ODS_SELECTED) {
+						
+					}
+					
+					DrawEdge(lpds->hDC, &lpds->rcItem, EDGE_ETCHED, BF_RECT); //BF_MONO //BF_RECT
 				}
 
 				// Custom drawing the close button.
@@ -438,11 +445,6 @@ PVOID ResultsForm(PVOID args) {
 	
 	
 	
-	
-
-	
-	
-	
 	while (true) {
 		Sleep(1000);
 		printf("Results\n");
@@ -541,11 +543,6 @@ PVOID MainForm(PVOID args) {
 		"LoginOutput");
 
 
-	
-
-
-	
-	
 	// Run the gui loop.
 	gframe.Run();
 	
